@@ -15,10 +15,9 @@
             const allowedUsers = data.record.allowedUsers;
 
             if (!allowedUsers.includes(username)) {
-                return; // not allowed, do nothing
+                return;
             }
 
-            // ─── allowed, run the menu ───────────────────────────
             if (window.quizletFullMenu) return;
             window.quizletFullMenu = true;
 
@@ -189,8 +188,8 @@
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    margin-bottom: 14px;
-                    padding-bottom: 12px;
+                    margin-bottom: 4px;
+                    padding-bottom: 10px;
                     border-bottom: 1px solid rgba(255,255,255,0.07);
                 }
 
@@ -216,6 +215,19 @@
                 @keyframes ql-pulse-dot {
                     0%, 100% { opacity: 1; box-shadow: 0 0 8px #4ade80; }
                     50%       { opacity: 0.4; box-shadow: 0 0 3px #4ade80; }
+                }
+
+                .ql-welcome {
+                    font-size: 11px;
+                    font-weight: 500;
+                    color: rgba(255,255,255,0.35);
+                    padding: 6px 2px 2px 2px;
+                    letter-spacing: 0.2px;
+                }
+
+                .ql-welcome span {
+                    color: rgba(255,255,255,0.65);
+                    font-weight: 600;
                 }
 
                 .ql-row {
@@ -246,6 +258,7 @@
             `;
             document.body.appendChild(menu);
 
+            // ─── Header ───────────────────────────────────────────
             const header = document.createElement('div');
             header.className = 'ql-header';
 
@@ -260,7 +273,7 @@
 
             const vBadge = document.createElement('span');
             vBadge.className = 'ql-badge';
-            vBadge.textContent = 'V2';
+            vBadge.textContent = 'V3';
 
             titleWrap.appendChild(dot);
             titleWrap.appendChild(titleText);
@@ -280,21 +293,15 @@
             header.appendChild(closeBtn);
             menu.appendChild(header);
 
+            // ─── Welcome line ──────────────────────────────────────
+            const welcome = document.createElement('div');
+            welcome.className = 'ql-welcome';
+            welcome.innerHTML = `👋 Welcome back, <span>${username}</span>`;
+            menu.appendChild(welcome);
+
+            // ─── Helpers ───────────────────────────────────────────
             function norm(t) {
                 return (t || '').toString().replace(/\s+/g, ' ').trim();
-            }
-
-            function getCardCount() {
-                try {
-                    let s = JSON.parse(__NEXT_DATA__.props.pageProps.dehydratedReduxStateKey);
-                    return s.studyModesCommon.studiableData.studiableItems.length;
-                } catch (e) { return null; }
-            }
-
-            function calcBestTime(cardCount) {
-                const baseTime = cardCount * 0.28;
-                const variance = (Math.random() * 0.4) - 0.2;
-                return Math.max(1.0, baseTime + variance).toFixed(2);
             }
 
             function buildTruePairs() {
@@ -421,6 +428,7 @@
                 status.style.color = color;
             }
 
+            // ─── Match Game ────────────────────────────────────────
             menu.appendChild(mkLabel('🎮  Match Game'));
 
             const pairRow = document.createElement('div');
@@ -478,18 +486,20 @@
             });
             menu.appendChild(autoWrongBtn);
 
+            // ─── Score Spoof ───────────────────────────────────────
             menu.appendChild(mkDivider());
             menu.appendChild(mkLabel('🏆  Score Spoof'));
             menu.appendChild(status);
 
             const spoofRow = document.createElement('div');
-            spoofRow.style.cssText = 'display:flex; gap:6px; margin-top:4px;';
+            spoofRow.style.display = 'flex';
+            spoofRow.style.gap = '6px';
+            spoofRow.style.marginTop = '4px';
 
             const spoofInput = document.createElement('input');
             spoofInput.className = 'ql-input';
             spoofInput.type = 'text';
             spoofInput.placeholder = 'Time (e.g. 1.0)';
-            spoofInput.style.cssText = 'flex:1; min-width:0;';
             spoofInput.oninput = () => {
                 const v = spoofInput.value.trim();
                 if (v && !isNaN(v)) setStatus(`Will submit: ${v}s`, '#4ade80');
@@ -507,32 +517,16 @@
                     spoofBtn.pulse(false);
                     setStatus('❌ Failed to submit', '#f87171');
                 });
-                });
-            spoofBtn.style.cssText = 'flex:1; min-width:0; margin:5px 0;';
+            });
+            spoofBtn.style.flexShrink = '0';
+            spoofBtn.style.width = 'auto';
+            spoofBtn.style.padding = '10px 14px';
 
             spoofRow.appendChild(spoofInput);
             spoofRow.appendChild(spoofBtn);
             menu.appendChild(spoofRow);
 
-            const autoBestBtn = mkBtn('⚡', 'Auto Best Time', 'yellow', () => {
-                const cardCount = getCardCount();
-                if (!cardCount) { autoBestBtn.pulse(false); setStatus('❌ Could not get card count', '#f87171'); return; }
-                const bestTime = calcBestTime(cardCount);
-                setStatus(`Submitting ${bestTime}s for ${cardCount} cards...`, '#fbbf24');
-                autoBestBtn.setLabel('Submitting...');
-                sendScore(bestTime, () => {
-                    autoBestBtn.pulse(true);
-                    autoBestBtn.setLabel('Auto Best Time');
-                    setStatus(`✅ Submitted: ${bestTime}s`, '#4ade80');
-                }, () => {
-                    autoBestBtn.pulse(false);
-                    autoBestBtn.setLabel('Auto Best Time');
-                    setStatus('❌ Failed to submit', '#f87171');
-                });
-            });
-            menu.appendChild(autoBestBtn);
-
-            // ─── Dragging ───────────────────────────────────────
+            // ─── Dragging ──────────────────────────────────────────
             let dragging = false, offsetX, offsetY, targetX, targetY, animating = false;
 
             menu.onmousedown = (e) => {
