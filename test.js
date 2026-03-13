@@ -492,39 +492,36 @@
             menu.appendChild(status);
 
             const spoofRow = document.createElement('div');
-            spoofRow.style.display = 'flex';
-            spoofRow.style.gap = '6px';
-            spoofRow.style.marginTop = '4px';
+spoofRow.style.cssText = 'display:flex; gap:6px; margin-top:4px;';
 
-            const spoofInput = document.createElement('input');
-            spoofInput.className = 'ql-input';
-            spoofInput.type = 'text';
-            spoofInput.placeholder = 'Time (e.g. 1.0)';
-            spoofInput.oninput = () => {
-                const v = spoofInput.value.trim();
-                if (v && !isNaN(v)) setStatus(`Will submit: ${v}s`, '#4ade80');
-                else setStatus('', '');
-            };
+const spoofInput = document.createElement('input');
+spoofInput.className = 'ql-input';
+spoofInput.type = 'text';
+spoofInput.placeholder = 'Time (e.g. 1.0)';
+spoofInput.style.cssText = 'flex:1; min-width:0;';
+spoofInput.oninput = () => {
+    const v = spoofInput.value.trim();
+    if (v && !isNaN(v)) setStatus(`Will submit: ${v}s`, '#4ade80');
+    else setStatus('', '');
+};
 
-            const spoofBtn = mkBtn('📤', 'Spoof', 'yellow', () => {
-                const v = spoofInput.value.trim();
-                if (!v || isNaN(v)) { spoofBtn.pulse(false); return; }
-                setStatus('Submitting...', '#fbbf24');
-                sendScore(v, () => {
-                    spoofBtn.pulse(true);
-                    setStatus(`✅ Submitted: ${v}s`, '#4ade80');
-                }, () => {
-                    spoofBtn.pulse(false);
-                    setStatus('❌ Failed to submit', '#f87171');
-                });
-            });
-            spoofBtn.style.flexShrink = '0';
-            spoofBtn.style.width = 'auto';
-            spoofBtn.style.padding = '10px 14px';
+const spoofBtn = mkBtn('📤', 'Spoof', 'yellow', () => {
+    const v = spoofInput.value.trim();
+    if (!v || isNaN(v)) { spoofBtn.pulse(false); return; }
+    setStatus('Submitting...', '#fbbf24');
+    sendScore(v, () => {
+        spoofBtn.pulse(true);
+        setStatus(`✅ Submitted: ${v}s`, '#4ade80');
+    }, () => {
+        spoofBtn.pulse(false);
+        setStatus('❌ Failed to submit', '#f87171');
+    });
+});
+spoofBtn.style.cssText = 'flex:1; min-width:0; margin:5px 0;';
 
-            spoofRow.appendChild(spoofInput);
-            spoofRow.appendChild(spoofBtn);
-            menu.appendChild(spoofRow);
+spoofRow.appendChild(spoofInput);
+spoofRow.appendChild(spoofBtn);
+menu.appendChild(spoofRow);
 
             // ─── Dragging ──────────────────────────────────────────
             let dragging = false, offsetX, offsetY, targetX, targetY, animating = false;
